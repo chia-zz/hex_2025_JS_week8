@@ -6,7 +6,7 @@ function init() {
 }
 init();
 
-// 獲取訂單資料
+// 獲取、渲染訂單資料
 function getOrderList() {
   axios
     .get(
@@ -23,6 +23,19 @@ function getOrderList() {
 
       let str = "";
       orderData.forEach(function (item) {
+        // 組訂單字串
+        let productItemStr = "";
+        item.products.forEach(function (productItem) {
+          productItemStr += `<p>${productItem.title}x${productItem.quantity}</p>`;
+        });
+        // 判斷訂單處理狀態
+        let orderStatus = "";
+        if (item.paid == true) {
+          orderStatus = "已處理";
+        } else {
+          orderStatus = "未處理";
+        }
+
         str += `<tr>
               <td>${item.id}</td>
               <td>
@@ -32,14 +45,14 @@ function getOrderList() {
               <td>${item.user.address}</td>
               <td>${item.user.email}</td>
               <td>
-                <p>Louvre 雙人床架</p>
+                ${productItemStr}
               </td>
               <td>${item.createdAt}</td>
               <td class="orderStatus">
-                <a href="#">${item.paid}</a>
+                <a href="#" class="orderStatusLink" data-id="${item.id}">${orderStatus}</a>
               </td>
               <td>
-                <input type="button" class="delSingleOrder-Btn" data-id="${item.id}" value="刪除" />
+                <input type="button" class="delSingleOrder-Btn orderDelete" data-id="${item.id}" value="刪除" />
               </td>
             </tr>`;
       });
@@ -47,4 +60,9 @@ function getOrderList() {
     });
 }
 
-// 渲染訂單資料
+// 未處理、刪除按鈕等功能
+orderList.addEventListener("click", function (e) {
+  e.preventDefault();
+  const targetClass = e.target.getAttribute("class");
+  console.log(targetClass);
+});
