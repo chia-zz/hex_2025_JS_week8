@@ -6,6 +6,47 @@ function init() {
 }
 init();
 
+function renderC3() {
+  console.log(orderData);
+
+  // 物件資料搜集
+  let total = {};
+  orderData.forEach(function (item) {
+    item.products.forEach(function (productItem) {
+      if (total[productItem.category] === undefined) {
+        total[productItem.category] = productItem.price * productItem.quantity;
+      }
+    });
+  });
+  console.log(total);
+
+  // 輸出資料關聯
+  let categoryAry = Object.keys(total);
+  let newData = [];
+  categoryAry.forEach(function (item) {
+    let ary = [];
+    ary.push(item);
+    ary.push(total[item]);
+    newData.push(ary);
+  });
+  console.log(newData);
+
+  // C3.js
+  let chart = c3.generate({
+    bindto: "#chart", // HTML 元素綁定
+    data: {
+      type: "pie",
+      columns: newData,
+      colors: {
+        床架: "#DACBFF",
+        窗簾: "#9D7FEA",
+        收納: "#5434A7",
+        其他: "#301E5F",
+      },
+    },
+  });
+}
+
 // 獲取、渲染訂單資料
 function getOrderList() {
   axios
@@ -19,7 +60,6 @@ function getOrderList() {
     )
     .then(function (response) {
       orderData = response.data.orders;
-      console.log(orderData);
 
       let str = "";
       orderData.forEach(function (item) {
@@ -62,6 +102,7 @@ function getOrderList() {
             </tr>`;
       });
       orderList.innerHTML = str;
+      renderC3();
     });
 }
 
@@ -128,3 +169,22 @@ function updateOrderStatus(status, id) {
       getOrderList();
     });
 }
+
+// 刪除全部訂單
+const discardAllBtn = document.querySelector(".discardAllBtn");
+discardAllBtn.addEventListener("click", function (e) {
+  e.preventDefault();
+  axios
+    .delete(
+      `https://livejs-api.hexschool.io/api/livejs/v1/admin/${api_path}/orders`,
+      {
+        headers: {
+          Authorization: token,
+        },
+      }
+    )
+    .then(function (response) {
+      alert("全部訂單刪除成功！");
+      getOrderList();
+    });
+});
