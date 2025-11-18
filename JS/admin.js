@@ -72,8 +72,8 @@ function renderC3() {
   }
 
   // C3.js
-  let chart = c3.generate({
-    bindto: "#chart", // HTML 元素綁定
+  let category = c3.generate({
+    bindto: "#category-chart", // HTML 元素綁定
     data: {
       type: "pie",
       columns: rankSortAry,
@@ -83,6 +83,25 @@ function renderC3() {
         收納: "#5434A7",
         其他: "#301E5F",
       },
+    },
+    size: {
+      width: 500,
+    },
+  });
+  let rankChart = c3.generate({
+    bindto: "#rank-chart", // HTML 元素綁定
+    data: {
+      type: "pie",
+      columns: rankSortAry,
+      colors: {
+        床架: "#DACBFF",
+        窗簾: "#9D7FEA",
+        收納: "#5434A7",
+        其他: "#301E5F",
+      },
+    },
+    size: {
+      width: 500,
     },
   });
 }
