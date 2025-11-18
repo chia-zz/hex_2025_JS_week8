@@ -7,36 +7,76 @@ function init() {
 init();
 
 function renderC3() {
-  console.log(orderData);
+  // // 物件資料搜集
+  // let total = {};
+  // orderData.forEach(function (item) {
+  //   item.products.forEach(function (productItem) {
+  //     if (total[productItem.category] === undefined) {
+  //       total[productItem.category] = productItem.price * productItem.quantity;
+  //     }
+  //   });
+  // });
+  // console.log(total);
 
-  // 物件資料搜集
-  let total = {};
+  // // 輸出資料關聯
+  // let categoryAry = Object.keys(total);
+  // let newData = [];
+  // categoryAry.forEach(function (item) {
+  //   let ary = [];
+  //   ary.push(item);
+  //   ary.push(total[item]);
+  //   newData.push(ary);
+  // });
+  // console.log(newData);
+
+  // 物件資料蒐集
+  let obj = {};
   orderData.forEach(function (item) {
     item.products.forEach(function (productItem) {
-      if (total[productItem.category] === undefined) {
-        total[productItem.category] = productItem.price * productItem.quantity;
+      if (obj[productItem.title] === undefined) {
+        obj[productItem.title] = productItem.quantity * productItem.price;
+      } else {
+        obj[productItem.title] += productItem.quantity * productItem.price;
       }
     });
   });
-  console.log(total);
+  console.log(obj);
 
-  // 輸出資料關聯
-  let categoryAry = Object.keys(total);
-  let newData = [];
-  categoryAry.forEach(function (item) {
+  // 拉出資料屬性、整理成C3格式
+  let originAry = Object.keys(obj);
+  console.log(originAry);
+  let rankSortAry = [];
+
+  originAry.forEach(function (item) {
     let ary = [];
     ary.push(item);
-    ary.push(total[item]);
-    newData.push(ary);
+    ary.push(obj[item]);
+    rankSortAry.push(ary);
   });
-  console.log(newData);
+  console.log(rankSortAry);
+  // 用sort比大小做出營收排序
+  rankSortAry.sort(function (a, b) {
+    return b[1] - a[1];
+  });
+
+  // 營收項目超過4筆後就統整到其他項目裡
+  if (rankSortAry.length > 3) {
+    let otherTotal = 0;
+    rankSortAry.forEach(function (item, index) {
+      if (index > 2) {
+        otherTotal += rankSortAry[index][1];
+      }
+    });
+    rankSortAry.splice(3, rankSortAry.length - 1);
+    rankSortAry.push(["其他", otherTotal]);
+  }
 
   // C3.js
   let chart = c3.generate({
     bindto: "#chart", // HTML 元素綁定
     data: {
       type: "pie",
-      columns: newData,
+      columns: rankSortAry,
       colors: {
         床架: "#DACBFF",
         窗簾: "#9D7FEA",

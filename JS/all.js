@@ -34,8 +34,8 @@ function assembleProductCard(item) {
           />
           <a href="#" class="addCardBtn" data-id="${item.id}">加入購物車</a>
           <h3>${item.title}</h3>
-          <del class="originPrice">NT$${item.origin_price}</del>
-          <p class="nowPrice">NT$${item.price}</p>
+          <del class="originPrice">NT$${toThousands(item.origin_price)}</del>
+          <p class="nowPrice">NT$${toThousands(item.price)}</p>
         </li>`;
 }
 
@@ -107,6 +107,10 @@ function getCartList() {
     )
     .then(function (response) {
       cartData = response.data.carts;
+      // 處理總金額
+      const finalTotal = document.querySelector(".final-total");
+      finalTotal.textContent = toThousands(response.data.finalTotal);
+
       let str = "";
       cartData.forEach(function (item) {
         str += `<tr>
@@ -119,9 +123,9 @@ function getCartList() {
                   <p>${item.product.title}</p>
                 </div>
               </td>
-              <td>NT$${item.product.price}</td>
+              <td>NT$${toThousands(item.product.price)}</td>
               <td>${item.quantity}</td>
-              <td>NT$${item.product.price * item.quantity}</td>
+              <td>NT$${toThousands(item.product.price * item.quantity)}</td>
               <td class="discardBtn">
                 <a href="#" class="material-icons" data-id="${
                   item.id
@@ -130,10 +134,6 @@ function getCartList() {
             </tr>`;
       });
       cartList.innerHTML = str;
-
-      // 處理總金額
-      const finalTotal = document.querySelector(".final-total");
-      finalTotal.textContent = response.data.finalTotal;
     });
 }
 
@@ -175,6 +175,7 @@ discardBtn.addEventListener("click", function (e) {
 
 // 送出訂單區
 const orderInfoBtn = document.querySelector(".orderInfo-btn");
+const orderInfoMessage = document.querySelector(".orderInfo-message");
 orderInfoBtn.addEventListener("click", function (e) {
   e.preventDefault();
   if (cartData.length === 0) {
@@ -203,6 +204,10 @@ orderInfoBtn.addEventListener("click", function (e) {
     alert("請輸入訂單資訊！");
     return;
   }
+  if (emailIsValid(customerEmail) === false) {
+    alert("請填寫正確的email");
+    return;
+  }
   // 製作訂單格式
   axios
     .post(
@@ -226,3 +231,23 @@ orderInfoBtn.addEventListener("click", function (e) {
       getCartList();
     });
 });
+// 雙重驗證email
+const customerEmail = document.querySelector("#customerEmail");
+customerEmail.addEventListener("blur", function (e) {
+  if (emailIsValid(customerEmail.value) === false) {
+    alert("請填寫正確的email");
+    return;
+  }
+});
+
+// util js
+// 處理千分位
+function toThousands(x) {
+  let parts = x.toString().split(".");
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return parts.join(".");
+}
+// 驗證email格式
+function emailIsValid(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
