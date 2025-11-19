@@ -197,6 +197,18 @@ cartList.addEventListener("click", function (e) {
         .catch(function (error) {
           showToast("發生錯誤，請稍後再試", "error");
         });
+    } else if (newQuantity === 0) {
+      axios
+        .delete(
+          `https://livejs-api.hexschool.io/api/livejs/v1/customer/${api_path}/carts/${cartId}`
+        )
+        .then(function (response) {
+          showToast("商品已從購物車移除！", "success");
+          getCartList();
+        })
+        .catch(function (error) {
+          showToast("發生錯誤，請稍後再試", "error");
+        });
     }
   } else if (e.target.classList.contains("plusBtn")) {
     const currentQuantity = parseInt(e.target.getAttribute("data-quantity"));
