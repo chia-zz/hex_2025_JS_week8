@@ -7,27 +7,25 @@ function init() {
 init();
 
 function renderC3() {
-  // // 物件資料搜集
-  // let total = {};
-  // orderData.forEach(function (item) {
-  //   item.products.forEach(function (productItem) {
-  //     if (total[productItem.category] === undefined) {
-  //       total[productItem.category] = productItem.price * productItem.quantity;
-  //     }
-  //   });
-  // });
-  // console.log(total);
+  // 類別營收資料
+  let total = {};
+  orderData.forEach(function (item) {
+    item.products.forEach(function (productItem) {
+      if (total[productItem.category] === undefined) {
+        total[productItem.category] = productItem.price * productItem.quantity;
+      }
+    });
+  });
 
-  // // 輸出資料關聯
-  // let categoryAry = Object.keys(total);
-  // let newData = [];
-  // categoryAry.forEach(function (item) {
-  //   let ary = [];
-  //   ary.push(item);
-  //   ary.push(total[item]);
-  //   newData.push(ary);
-  // });
-  // console.log(newData);
+  // 輸出資料關聯
+  let categoryAry = Object.keys(total);
+  let newData = [];
+  categoryAry.forEach(function (item) {
+    let ary = [];
+    ary.push(item);
+    ary.push(total[item]);
+    newData.push(ary);
+  });
 
   // 物件資料蒐集
   let obj = {};
@@ -76,13 +74,10 @@ function renderC3() {
     bindto: "#category-chart", // HTML 元素綁定
     data: {
       type: "pie",
-      columns: rankSortAry,
-      colors: {
-        床架: "#DACBFF",
-        窗簾: "#9D7FEA",
-        收納: "#5434A7",
-        其他: "#301E5F",
-      },
+      columns: newData,
+    },
+    color: {
+      pattern: ["#301E5F", "#5434A7", "#9D7FEA", "#DACBFF"],
     },
     size: {
       width: 500,
@@ -93,12 +88,9 @@ function renderC3() {
     data: {
       type: "pie",
       columns: rankSortAry,
-      colors: {
-        床架: "#DACBFF",
-        窗簾: "#9D7FEA",
-        收納: "#5434A7",
-        其他: "#301E5F",
-      },
+    },
+    color: {
+      pattern: ["#042B58", "#016191", "#0ea0d0", "#7cb0d3"],
     },
     size: {
       width: 500,
@@ -162,6 +154,9 @@ function getOrderList() {
       });
       orderList.innerHTML = str;
       renderC3();
+    })
+    .catch(function (error) {
+      showToast("發生錯誤，請稍後再試", "error");
     });
 }
 
@@ -194,8 +189,11 @@ function deleteOrderItem(id) {
       }
     )
     .then(function (response) {
-      alert("訂單刪除成功！");
+      showToast("訂單刪除成功！");
       getOrderList();
+    })
+    .catch(function (error) {
+      showToast("發生錯誤，請稍後再試", "error");
     });
 }
 
@@ -203,9 +201,9 @@ function deleteOrderItem(id) {
 function updateOrderStatus(status, id) {
   console.log(status, id);
   let newStatus;
-  if (status === true) {
+  if (status === "true") {
     newStatus = false;
-  } else if (status !== true) {
+  } else {
     newStatus = true;
   }
   axios
@@ -224,8 +222,11 @@ function updateOrderStatus(status, id) {
       }
     )
     .then(function (response) {
-      alert("修改訂單狀態成功！");
+      showToast("修改訂單狀態成功！");
       getOrderList();
+    })
+    .catch(function (error) {
+      showToast("發生錯誤，請稍後再試", "error");
     });
 }
 
@@ -243,7 +244,42 @@ discardAllBtn.addEventListener("click", function (e) {
       }
     )
     .then(function (response) {
-      alert("全部訂單刪除成功！");
+      showToast("全部訂單刪除成功！");
       getOrderList();
+    })
+    .catch(function (error) {
+      showToast("發生錯誤，請稍後再試", "error");
     });
 });
+
+// toastify style設定
+const toastifyStyle = {
+  error: {
+    style: {
+      color: "#e96868",
+      background: "#eeecec",
+      border: "1px solid #e96868",
+    },
+  },
+  success: {
+    style: {
+      color: "#28a745",
+      background: "#eeecec",
+      border: "1px solid #28a745",
+    },
+  },
+  warning: {
+    style: {
+      color: "#ff9c07",
+      background: "#eeecec",
+      border: "1px solid #ff9c07",
+    },
+  },
+};
+function showToast(message, type = "success") {
+  Toastify({
+    text: message,
+    className: "info",
+    style: toastifyStyle[type].style,
+  }).showToast();
+}

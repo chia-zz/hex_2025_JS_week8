@@ -21,6 +21,9 @@ function getProductList() {
     .then(function (response) {
       productData = response.data.products;
       renderProductList();
+    })
+    .catch(function (error) {
+      showToast("發生錯誤，請稍後再試", "error");
     });
 }
 
@@ -80,7 +83,7 @@ productList.addEventListener("click", function (e) {
       numCheck = item.quantity += 1;
     }
   });
-  console.log(numCheck);
+  // console.log(numCheck); 檢查用
 
   axios
     .post(
@@ -93,9 +96,11 @@ productList.addEventListener("click", function (e) {
       }
     )
     .then(function (response) {
-      console.log(response);
-      alert("加入購物車！");
+      showToast("加入購物車！", "success");
       getCartList();
+    })
+    .catch(function (error) {
+      showToast("發生錯誤，請稍後再試", "error");
     });
 });
 
@@ -112,8 +117,11 @@ function getCartList() {
       finalTotal.textContent = toThousands(response.data.finalTotal);
 
       let str = "";
-      cartData.forEach(function (item) {
-        str += `<tr>
+      if (cartData.length === 0) {
+        str = `<tr><td colspan="5" style="text-align: center;"><h2>目前購物車是空的喔！</h2></td></tr>`;
+      } else {
+        cartData.forEach(function (item) {
+          str += `<tr>
               <td>
                 <div class="cardItem-title">
                   <img
@@ -124,7 +132,9 @@ function getCartList() {
                 </div>
               </td>
               <td>NT$${toThousands(item.product.price)}</td>
-              <td>${item.quantity}</td>
+              <td><input type="button" class="minusBtn" value="-"> <span>${
+                item.quantity
+              }</span> <input type="button" class="plusBtn" value="+"></td>
               <td>NT$${toThousands(item.product.price * item.quantity)}</td>
               <td class="discardBtn">
                 <a href="#" class="material-icons" data-id="${
@@ -132,8 +142,12 @@ function getCartList() {
                 }"> clear </a>
               </td>
             </tr>`;
-      });
+        });
+      }
       cartList.innerHTML = str;
+    })
+    .catch(function (error) {
+      showToast("發生錯誤，請稍後再試", "error");
     });
 }
 
@@ -142,7 +156,6 @@ cartList.addEventListener("click", function (e) {
   e.preventDefault();
   const cartId = e.target.getAttribute("data-id");
   if (cartId == null) {
-    alert("點空惹！");
     return;
   }
   console.log(cartId);
@@ -151,8 +164,11 @@ cartList.addEventListener("click", function (e) {
       `https://livejs-api.hexschool.io/api/livejs/v1/customer/${api_path}/carts/${cartId}`
     )
     .then(function (response) {
-      alert("刪除單筆購物車成功！");
+      showToast("刪除單筆購物車成功！", "success");
       getCartList();
+    })
+    .catch(function (error) {
+      showToast("發生錯誤，請稍後再試", "error");
     });
 });
 
@@ -165,11 +181,11 @@ discardBtn.addEventListener("click", function (e) {
       `https://livejs-api.hexschool.io/api/livejs/v1/customer/${api_path}/carts`
     )
     .then(function (response) {
-      alert("刪除全部購物車成功！");
+      showToast("刪除全部購物車成功！", "success");
       getCartList();
     })
     .catch(function (response) {
-      alert("已經沒有東西可刪除了！");
+      showToast("已經沒有東西可刪除了！", "warning");
     });
 });
 
@@ -179,7 +195,7 @@ const orderInfoMessage = document.querySelector(".orderInfo-message");
 orderInfoBtn.addEventListener("click", function (e) {
   e.preventDefault();
   if (cartData.length === 0) {
-    alert("請加入購物車！");
+    showToast("請先加入商品到購物車！", "warning");
     return;
   }
   const customerName = document.querySelector("#customerName").value;
@@ -201,11 +217,11 @@ orderInfoBtn.addEventListener("click", function (e) {
     customerAddress === "" ||
     tradeWay === ""
   ) {
-    alert("請輸入訂單資訊！");
+    showToast("請輸入訂單資訊！", "error");
     return;
   }
   if (emailIsValid(customerEmail) === false) {
-    alert("請填寫正確的email");
+    showToast("請填寫正確的Email格式", "error");
     return;
   }
   // 製作訂單格式
@@ -225,20 +241,63 @@ orderInfoBtn.addEventListener("click", function (e) {
       }
     )
     .then(function (response) {
-      alert("訂單建立成功！");
+      showToast("訂單建立成功！", "success");
       const orderInfoForm = document.querySelector(".orderInfo-form");
       orderInfoForm.reset();
       getCartList();
+    })
+    .catch(function (error) {
+      showToast("訂單建立失敗，請稍後再試", "error");
     });
 });
 // 雙重驗證email
 const customerEmail = document.querySelector("#customerEmail");
 customerEmail.addEventListener("blur", function (e) {
   if (emailIsValid(customerEmail.value) === false) {
-    alert("請填寫正確的email");
+    showToast("請填寫正確的Email格式！", "error");
     return;
   }
 });
+// 驗證電話
+const customerPhone = document.querySelector("#customerPhone");
+customerPhone.addEventListener("blur", function (e) {
+  if (telIsValid(customerPhone.value) === false) {
+    showToast("請填寫正確的電話號碼！", "error");
+    return;
+  }
+});
+
+// toastify style設定
+const toastifyStyle = {
+  error: {
+    style: {
+      color: "#e96868",
+      background: "#eeecec",
+      border: "1px solid #e96868",
+    },
+  },
+  success: {
+    style: {
+      color: "#28a745",
+      background: "#eeecec",
+      border: "1px solid #28a745",
+    },
+  },
+  warning: {
+    style: {
+      color: "#ff9c07",
+      background: "#eeecec",
+      border: "1px solid #ff9c07",
+    },
+  },
+};
+function showToast(message, type = "error") {
+  Toastify({
+    text: message,
+    className: "info",
+    style: toastifyStyle[type].style,
+  }).showToast();
+}
 
 // util js
 // 處理千分位
@@ -247,7 +306,18 @@ function toThousands(x) {
   parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   return parts.join(".");
 }
+// 數量增減按鈕
+function minus() {}
+const minusBtn = document.querySelector(".minusBtn");
+minusBtn.addEventListener("click", function (e) {
+  console.log(e.target);
+});
 // 驗證email格式
 function emailIsValid(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+// 驗證電話號碼
+function telIsValid(phone) {
+  const telTest = /^\d{10}$/;
+  return telTest.test(phone);
 }
