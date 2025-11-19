@@ -114,6 +114,7 @@ function getCartList() {
       finalTotal.textContent = toThousands(response.data.finalTotal);
 
       let str = "";
+      // 如果購物車沒有東西
       if (cartData.length === 0) {
         str = `<tr><td colspan="5" style="text-align: center;"><h2>目前購物車是空的喔！</h2></td></tr>`;
       } else {
@@ -129,16 +130,20 @@ function getCartList() {
                 </div>
               </td>
               <td>NT$${toThousands(item.product.price)}</td>
-              <td><input type="button" class="minusBtn" data-id="${
-                item.id
-              }" value="-"> <span>${
-            item.quantity
-          }</span> <input type="button" class="plusBtn" data-id="${
-            item.id
-          }" value="+"></td>
+              <td>
+                <div class="item-quantity">
+                  <input type="button" class="minusBtn" data-id="${
+                    item.id
+                  }" data-quantity="${item.quantity}" value="-"> 
+                  <span>${item.quantity}</span> 
+                  <input type="button" class="plusBtn" data-id="${
+                    item.id
+                  }" data-quantity="${item.quantity}" value="+">
+                </div>
+              </td>
               <td>NT$${toThousands(item.product.price * item.quantity)}</td>
               <td class="discardBtn">
-                <a href="#" class="material-icons" data-id="${
+                <a href="#" class="material-icons delete-single-btn" data-id="${
                   item.id
                 }"> clear </a>
               </td>
@@ -152,7 +157,8 @@ function getCartList() {
     });
 }
 
-// 刪除購物車內容功能
+// 處理購物車內容功能
+// const discardBtn = document.querySelector(".material-icons");
 cartList.addEventListener("click", function (e) {
   e.preventDefault();
   const cartId = e.target.getAttribute("data-id");
@@ -160,22 +166,60 @@ cartList.addEventListener("click", function (e) {
     return;
   }
   console.log(cartId);
-  axios
-    .delete(
-      `https://livejs-api.hexschool.io/api/livejs/v1/customer/${api_path}/carts/${cartId}`
-    )
-    .then(function (response) {
-      showToast("刪除單筆購物車成功！", "success");
-      getCartList();
-    })
-    .catch(function (error) {
-      showToast("發生錯誤，請稍後再試", "error");
-    });
+
+  // 刪除單筆邏輯
+  if (e.target.classList.contains("delete-single-btn")) {
+    axios
+      .delete(
+        `https://livejs-api.hexschool.io/api/livejs/v1/customer/${api_path}/carts/${cartId}`
+      )
+      .then(function (response) {
+        showToast("刪除單筆購物車成功！", "success");
+        getCartList();
+      })
+      .catch(function (error) {
+        showToast("發生錯誤，請稍後再試", "error");
+      });
+  } else if (e.target.classList.contains("minusBtn")) {
+    const currentQuantity = parseInt(e.target.getAttribute("data-quantity"));
+    const newQuantity = currentQuantity - 1;
+
+    if (newQuantity > 0) {
+      axios
+        .patch(
+          `https://livejs-api.hexschool.io/api/livejs/v1/customer/${api_path}/carts`,
+          { data: { id: cartId, quantity: newQuantity } }
+        )
+        .then(function (response) {
+          showToast("減少數量成功", "success");
+          getCartList();
+        })
+        .catch(function (error) {
+          showToast("發生錯誤，請稍後再試", "error");
+        });
+    }
+  } else if (e.target.classList.contains("plusBtn")) {
+    const currentQuantity = parseInt(e.target.getAttribute("data-quantity"));
+    const newQuantity = currentQuantity + 1;
+
+    axios
+      .patch(
+        `https://livejs-api.hexschool.io/api/livejs/v1/customer/${api_path}/carts`,
+        { data: { id: cartId, quantity: newQuantity } }
+      )
+      .then(function (response) {
+        showToast("增加數量成功", "success");
+        getCartList();
+      })
+      .catch(function (error) {
+        showToast("發生錯誤，請稍後再試", "error");
+      });
+  }
 });
 
 // 刪除購物車全部品項流程
-const discardBtn = document.querySelector(".discardAllBtn");
-discardBtn.addEventListener("click", function (e) {
+const discardAllBtn = document.querySelector(".discardAllBtn");
+discardAllBtn.addEventListener("click", function (e) {
   e.preventDefault();
   axios
     .delete(
