@@ -1,5 +1,3 @@
-console.log(api_path, token);
-
 const productList = document.querySelector(".productWrap");
 const productSelect = document.querySelector(".productSelect");
 const cartList = document.querySelector(".shoppingCart-tableBody");
@@ -74,7 +72,6 @@ productList.addEventListener("click", function (e) {
     return;
   }
   let productId = e.target.getAttribute("data-id");
-  console.log(productId);
 
   // 點擊按鈕、加入購物車流程
   let numCheck = 1;
@@ -132,9 +129,13 @@ function getCartList() {
                 </div>
               </td>
               <td>NT$${toThousands(item.product.price)}</td>
-              <td><input type="button" class="minusBtn" value="-"> <span>${
-                item.quantity
-              }</span> <input type="button" class="plusBtn" value="+"></td>
+              <td><input type="button" class="minusBtn" data-id="${
+                item.id
+              }" value="-"> <span>${
+            item.quantity
+          }</span> <input type="button" class="plusBtn" data-id="${
+            item.id
+          }" value="+"></td>
               <td>NT$${toThousands(item.product.price * item.quantity)}</td>
               <td class="discardBtn">
                 <a href="#" class="material-icons" data-id="${
@@ -155,7 +156,7 @@ function getCartList() {
 cartList.addEventListener("click", function (e) {
   e.preventDefault();
   const cartId = e.target.getAttribute("data-id");
-  if (cartId == null) {
+  if (cartId === null) {
     return;
   }
   console.log(cartId);
@@ -203,21 +204,21 @@ orderInfoBtn.addEventListener("click", function (e) {
   const customerEmail = document.querySelector("#customerEmail").value;
   const customerAddress = document.querySelector("#customerAddress").value;
   const tradeWay = document.querySelector("#tradeWay").value;
-  console.log(
-    customerName,
-    customerPhone,
-    customerEmail,
-    customerAddress,
-    tradeWay
-  );
+  // console.log(
+  //   customerName,
+  //   customerPhone,
+  //   customerEmail,
+  //   customerAddress,
+  //   tradeWay
+  // );
   if (
     customerName === "" ||
     customerPhone === "" ||
     customerEmail === "" ||
     customerAddress === "" ||
-    tradeWay === ""
+    tradeWay === "請選擇付款方式"
   ) {
-    showToast("請輸入訂單資訊！", "error");
+    showToast("請正確填寫訂單資料！", "error");
     return;
   }
   if (emailIsValid(customerEmail) === false) {
@@ -307,11 +308,11 @@ function toThousands(x) {
   return parts.join(".");
 }
 // 數量增減按鈕
-function minus() {}
-const minusBtn = document.querySelector(".minusBtn");
-minusBtn.addEventListener("click", function (e) {
-  console.log(e.target);
-});
+// function minus() {}
+// const minusBtn = document.querySelector(".minusBtn");
+// minusBtn.addEventListener("click", function (e) {
+//   console.log(e.target);
+// });
 // 驗證email格式
 function emailIsValid(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
