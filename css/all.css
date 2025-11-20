@@ -634,11 +634,22 @@ body {
   margin-bottom: 30px;
 }
 
+.productCard .image-container {
+  overflow: hidden;
+  position: relative;
+}
+
+.productCard:hover img {
+  transform: scale(1.05);
+}
+
 .productCard img {
   min-height: 300px;
   width: 100%;
   -o-object-fit: cover;
   object-fit: cover;
+  transition: transform 0.3s ease;
+  z-index: 2;
 }
 
 .productCard a {
@@ -680,6 +691,7 @@ body {
   background-color: #000000;
   color: #ffffff;
   padding: 8px 24px;
+  z-index: 15;
 }
 
 .originPrice {
@@ -716,10 +728,30 @@ body {
   text-align: center;
   vertical-align: middle;
 }
+
+tbody tr:hover {
+  background-color: #e7e7e7;
+}
+
 .item-quantity {
   display: flex;
   justify-content: space-around;
   align-items: center;
+}
+
+.minusBtn,
+.plusBtn {
+  width: 24px;
+  height: 24px;
+  text-align: center;
+  border: 1px solid #777777;
+  border-radius: 16px;
+}
+.minusBtn:hover,
+.plusBtn:hover {
+  color: #fff;
+  background-color: #6a33f8;
+  border: 1px solid #6a33f8;
 }
 
 .shoppingCart-table tr:first-child,

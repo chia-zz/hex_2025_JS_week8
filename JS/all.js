@@ -29,10 +29,12 @@ function getProductList() {
 function assembleProductCard(item) {
   return `<li class="productCard">
           <h4 class="productType">新品</h4>
-          <img
-            src=${item.images}
-            alt="${item.title}"
-          />
+          <div class="image-container"> 
+            <img
+              src=${item.images}
+              alt="${item.title}"
+            />
+          </div>
           <a href="#" class="addCardBtn" data-id="${item.id}">加入購物車</a>
           <h3>${item.title}</h3>
           <del class="originPrice">NT$${toThousands(item.origin_price)}</del>
