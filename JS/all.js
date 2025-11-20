@@ -82,7 +82,6 @@ productList.addEventListener("click", function (e) {
       numCheck = item.quantity += 1;
     }
   });
-  // console.log(numCheck); 檢查用
 
   axios
     .post(
@@ -166,7 +165,6 @@ cartList.addEventListener("click", function (e) {
   if (cartId === null) {
     return;
   }
-  console.log(cartId);
 
   // 刪除單筆邏輯
   if (e.target.classList.contains("delete-single-btn")) {

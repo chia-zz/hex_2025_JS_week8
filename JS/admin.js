@@ -11,21 +11,25 @@ function renderC3() {
   let total = {};
   orderData.forEach(function (item) {
     item.products.forEach(function (productItem) {
+      const revenue = productItem.price * productItem.quantity;
       if (total[productItem.category] === undefined) {
-        total[productItem.category] = productItem.price * productItem.quantity;
+        total[productItem.category] = revenue;
+      } else {
+        total[productItem.category] += revenue;
       }
     });
   });
 
   // 輸出資料關聯
-  let categoryAry = Object.keys(total);
-  let newData = [];
-  categoryAry.forEach(function (item) {
-    let ary = [];
-    ary.push(item);
-    ary.push(total[item]);
-    newData.push(ary);
-  });
+  let newData = Object.entries(total);
+  // let categoryAry = Object.keys(total);
+  // let newData = [];
+  // categoryAry.forEach(function (item) {
+  //   let ary = [];
+  //   ary.push(item);
+  //   ary.push(total[item]);
+  //   newData.push(ary);
+  // });
 
   // 物件資料蒐集
   let obj = {};
@@ -38,20 +42,18 @@ function renderC3() {
       }
     });
   });
-  console.log(obj);
 
   // 拉出資料屬性、整理成C3格式
-  let originAry = Object.keys(obj);
-  console.log(originAry);
-  let rankSortAry = [];
+  let rankSortAry = Object.entries(obj);
+  // let originAry = Object.keys(obj);
+  // let rankSortAry = [];
+  // originAry.forEach(function (item) {
+  //   let ary = [];
+  //   ary.push(item);
+  //   ary.push(obj[item]);
+  //   rankSortAry.push(ary);
+  // });
 
-  originAry.forEach(function (item) {
-    let ary = [];
-    ary.push(item);
-    ary.push(obj[item]);
-    rankSortAry.push(ary);
-  });
-  console.log(rankSortAry);
   // 用sort比大小做出營收排序
   rankSortAry.sort(function (a, b) {
     return b[1] - a[1];
@@ -79,9 +81,6 @@ function renderC3() {
     color: {
       pattern: ["#301E5F", "#5434A7", "#9D7FEA", "#DACBFF"],
     },
-    size: {
-      width: 500,
-    },
   });
   let rankChart = c3.generate({
     bindto: "#rank-chart", // HTML 元素綁定
@@ -91,9 +90,6 @@ function renderC3() {
     },
     color: {
       pattern: ["#042B58", "#016191", "#0ea0d0", "#7cb0d3"],
-    },
-    size: {
-      width: 500,
     },
   });
 }
@@ -110,7 +106,14 @@ function getOrderList() {
       }
     )
     .then(function (response) {
-      orderData = response.data.orders;
+      orderData = response.data.orders.sort(function (a, b) {
+        // 訂單時間順序
+        if (sortOrder === "newest") {
+          return b.createdAt - a.createdAt;
+        } else {
+          return a.createdAt - b.createdAt;
+        }
+      });
 
       let str = "";
       orderData.forEach(function (item) {
@@ -199,7 +202,7 @@ function deleteOrderItem(id) {
 
 // 修改訂單狀態功能
 function updateOrderStatus(status, id) {
-  console.log(status, id);
+  // console.log(status, id); 檢查用
   let newStatus;
   if (status === "true") {
     newStatus = false;
@@ -250,6 +253,14 @@ discardAllBtn.addEventListener("click", function (e) {
     .catch(function (error) {
       showToast("發生錯誤，請稍後再試", "error");
     });
+});
+
+// 訂單時間排序
+const sortOrderSelect = document.querySelector("#sortOrder");
+let sortOrder = "newest";
+sortOrderSelect.addEventListener("change", function (e) {
+  sortOrder = e.target.value;
+  getOrderList();
 });
 
 // toastify style設定

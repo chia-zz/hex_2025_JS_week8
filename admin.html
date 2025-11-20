@@ -32,7 +32,7 @@
       type="text/css"
       href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"
     />
-    <link rel="stylesheet" href="css/all.css" />
+    <link rel="stylesheet" href="css/admin.css" />
   </head>
   <body>
     <nav class="topBar">
@@ -59,7 +59,14 @@
       </div>
     </section>
     <section class="wrap orderPage-list">
-      <a href="#" class="discardAllBtn">清除全部訂單</a>
+      <div class="function-btn">
+        <select id="sortOrder">
+          <option value="newest">由新到舊</option>
+          <option value="oldest">由舊到新</option>
+        </select>
+        <a href="#" class="discardAllBtn">清除全部訂單</a>
+      </div>
+
       <div class="orderTableWrap">
         <table class="orderPage-table">
           <thead>
