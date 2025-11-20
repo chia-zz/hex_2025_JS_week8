@@ -180,10 +180,11 @@ cartList.addEventListener("click", function (e) {
       .catch(function (error) {
         showToast("發生錯誤，請稍後再試", "error");
       });
-  } else if (e.target.classList.contains("minusBtn")) {
+  }
+  // 減少數量邏輯+如果購物車數量被減為0就刪除該筆項目
+  else if (e.target.classList.contains("minusBtn")) {
     const currentQuantity = parseInt(e.target.getAttribute("data-quantity"));
     const newQuantity = currentQuantity - 1;
-
     if (newQuantity > 0) {
       axios
         .patch(
@@ -191,7 +192,7 @@ cartList.addEventListener("click", function (e) {
           { data: { id: cartId, quantity: newQuantity } }
         )
         .then(function (response) {
-          showToast("減少數量成功", "success");
+          showToast("減少數量成功", "decrease");
           getCartList();
         })
         .catch(function (error) {
@@ -203,24 +204,25 @@ cartList.addEventListener("click", function (e) {
           `https://livejs-api.hexschool.io/api/livejs/v1/customer/${api_path}/carts/${cartId}`
         )
         .then(function (response) {
-          showToast("商品已從購物車移除！", "success");
+          showToast("商品已從購物車移除！", "remove");
           getCartList();
         })
         .catch(function (error) {
           showToast("發生錯誤，請稍後再試", "error");
         });
     }
-  } else if (e.target.classList.contains("plusBtn")) {
+  }
+  // 增加數量邏輯
+  else if (e.target.classList.contains("plusBtn")) {
     const currentQuantity = parseInt(e.target.getAttribute("data-quantity"));
     const newQuantity = currentQuantity + 1;
-
     axios
       .patch(
         `https://livejs-api.hexschool.io/api/livejs/v1/customer/${api_path}/carts`,
         { data: { id: cartId, quantity: newQuantity } }
       )
       .then(function (response) {
-        showToast("增加數量成功", "success");
+        showToast("增加數量成功", "increase");
         getCartList();
       })
       .catch(function (error) {
@@ -248,37 +250,56 @@ discardAllBtn.addEventListener("click", function (e) {
 
 // 送出訂單區
 const orderInfoBtn = document.querySelector(".orderInfo-btn");
-const orderInfoMessage = document.querySelector(".orderInfo-message");
+const orderInfoMessage = document.querySelectorAll(".orderInfo-message");
 orderInfoBtn.addEventListener("click", function (e) {
   e.preventDefault();
   if (cartData.length === 0) {
     showToast("請先加入商品到購物車！", "warning");
     return;
   }
-  const customerName = document.querySelector("#customerName").value;
-  const customerPhone = document.querySelector("#customerPhone").value;
-  const customerEmail = document.querySelector("#customerEmail").value;
-  const customerAddress = document.querySelector("#customerAddress").value;
-  const tradeWay = document.querySelector("#tradeWay").value;
-  // console.log(
-  //   customerName,
-  //   customerPhone,
-  //   customerEmail,
-  //   customerAddress,
-  //   tradeWay
-  // );
-  if (
-    customerName === "" ||
-    customerPhone === "" ||
-    customerEmail === "" ||
-    customerAddress === "" ||
-    tradeWay === "請選擇付款方式"
-  ) {
-    showToast("請正確填寫訂單資料！", "error");
+  const customerName = document.querySelector("#customerName");
+  const customerPhone = document.querySelector("#customerPhone");
+  const customerEmail = document.querySelector("#customerEmail");
+  const customerAddress = document.querySelector("#customerAddress");
+  const tradeWay = document.querySelector("#tradeWay");
+  const formInputs = [
+    customerName,
+    customerPhone,
+    customerEmail,
+    customerAddress,
+    tradeWay,
+  ];
+  // 整體驗證
+  orderInfoMessage.forEach((item) => {
+    item.innerHTML = "";
+  });
+  let isFormValid = true; // 驗證是否為空
+  formInputs.forEach((item, index) => {
+    if (!orderInfoMessage[index]) return;
+    const value = item.value;
+    if (value.trim() === "") {
+      orderInfoMessage[index].innerHTML = `
+                <p style="color: #dc3545;">此欄必填！</p>
+            `;
+      isFormValid = false;
+    } else if (value === "請選擇付款方式") {
+      orderInfoMessage[index].innerHTML = `
+                <p style="color: #dc3545;">此欄必選！</p>
+            `;
+      isFormValid = false;
+    }
+  });
+  if (!isFormValid) {
     return;
   }
-  if (emailIsValid(customerEmail) === false) {
-    showToast("請填寫正確的Email格式", "error");
+
+  // 單一欄位驗證
+  if (emailIsValid(customerEmail.value) === false) {
+    showToast("請填寫正確的Email格式！", "error");
+    return;
+  }
+  if (telIsValid(customerPhone.value) === false) {
+    showToast("請填寫正確的電話號碼！", "error");
     return;
   }
   // 製作訂單格式
@@ -288,11 +309,11 @@ orderInfoBtn.addEventListener("click", function (e) {
       {
         data: {
           user: {
-            name: customerName,
-            tel: customerPhone,
-            email: customerEmail,
-            address: customerAddress,
-            payment: tradeWay,
+            name: customerName.value,
+            tel: customerPhone.value,
+            email: customerEmail.value,
+            address: customerAddress.value,
+            payment: tradeWay.value,
           },
         },
       }
@@ -315,7 +336,7 @@ customerEmail.addEventListener("blur", function (e) {
     return;
   }
 });
-// 驗證電話
+// 雙重驗證電話
 const customerPhone = document.querySelector("#customerPhone");
 customerPhone.addEventListener("blur", function (e) {
   if (telIsValid(customerPhone.value) === false) {
@@ -328,23 +349,41 @@ customerPhone.addEventListener("blur", function (e) {
 const toastifyStyle = {
   error: {
     style: {
-      color: "#e96868",
-      background: "#eeecec",
-      border: "1px solid #e96868",
+      color: "#dc3545",
+      background: "#f8d7da",
+      border: "1px solid #dc3545",
     },
   },
   success: {
     style: {
-      color: "#28a745",
-      background: "#eeecec",
-      border: "1px solid #28a745",
+      color: "#198754",
+      background: "#d1e7dd",
+      border: "1px solid #198754",
     },
   },
   warning: {
     style: {
-      color: "#ff9c07",
-      background: "#eeecec",
-      border: "1px solid #ff9c07",
+      color: "#ffc107",
+      background: "#fff3cd",
+      border: "1px solid #ffc107",
+    },
+  },
+  increase: {
+    style: {
+      color: "#f8f9fa",
+      background: "#8540f5",
+    },
+  },
+  decrease: {
+    style: {
+      color: "#f8f9fa",
+      background: "#432874",
+    },
+  },
+  remove: {
+    style: {
+      color: "#f8f9fa",
+      background: "#c53030",
     },
   },
 };

@@ -256,23 +256,23 @@ discardAllBtn.addEventListener("click", function (e) {
 const toastifyStyle = {
   error: {
     style: {
-      color: "#e96868",
-      background: "#eeecec",
-      border: "1px solid #e96868",
+      color: "#dc3545",
+      background: "#f8d7da",
+      border: "1px solid #dc3545",
     },
   },
   success: {
     style: {
-      color: "#28a745",
-      background: "#eeecec",
-      border: "1px solid #28a745",
+      color: "#198754",
+      background: "#d1e7dd",
+      border: "1px solid #198754",
     },
   },
   warning: {
     style: {
-      color: "#ff9c07",
-      background: "#eeecec",
-      border: "1px solid #ff9c07",
+      color: "#ffc107",
+      background: "#fff3cd",
+      border: "1px solid #ffc107",
     },
   },
 };
