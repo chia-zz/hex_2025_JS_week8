@@ -158,7 +158,6 @@ function getCartList() {
 }
 
 // 處理購物車內容功能
-// const discardBtn = document.querySelector(".material-icons");
 cartList.addEventListener("click", function (e) {
   e.preventDefault();
   const cartId = e.target.getAttribute("data-id");
@@ -302,6 +301,7 @@ orderInfoBtn.addEventListener("click", function (e) {
     showToast("請填寫正確的電話號碼！", "error");
     return;
   }
+
   // 製作訂單格式
   axios
     .post(
@@ -402,12 +402,6 @@ function toThousands(x) {
   parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   return parts.join(".");
 }
-// 數量增減按鈕
-// function minus() {}
-// const minusBtn = document.querySelector(".minusBtn");
-// minusBtn.addEventListener("click", function (e) {
-//   console.log(e.target);
-// });
 // 驗證email格式
 function emailIsValid(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
